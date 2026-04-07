@@ -3,7 +3,11 @@ data "aws_ami" "ubuntu" {
   owners      = ["099720109477"]
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+  }
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 }
 
@@ -18,19 +22,23 @@ resource "aws_instance" "managers" {
   iam_instance_profile   = aws_iam_instance_profile.ssm_profile.name
 
   root_block_device {
-    volume_size = 20
+    volume_size = 10
     volume_type = "gp3"
+    encrypted   = true
   }
 
   tags = {
     Name = "${var.name_prefix}-manager-${count.index + 1}"
     Role = "manager"
+    Environment = "production"
   }
 
-  user_data = templatefile("${path.module}/userdata.sh", {
-    node_role   = "manager"
-    environment = "dev"
-  })
+  user_data = <<-EOF
+    #!/bin/bash
+    hostnamectl set-hostname manager-${count.index + 1}
+    echo "127.0.0.1 manager-${count.index + 1}" >> /etc/hosts
+  EOF
+  
 }
 
 # Worker Nodes
@@ -45,17 +53,23 @@ resource "aws_instance" "workers" {
   iam_instance_profile   = aws_iam_instance_profile.ssm_profile.name
 
   root_block_device {
-    volume_size = 25
+    volume_size = 10
     volume_type = "gp3"
+    encrypted   = true
   }
 
   tags = {
     Name = "${var.name_prefix}-worker-${count.index + 1}"
     Role = "worker"
+    Environment = "production"
   }
 
-  user_data = templatefile("${path.module}/userdata.sh", {
-    node_role   = "worker"
-    environment = "dev"
-  })
+  user_data = <<-EOF
+    #!/bin/bash
+    hostnamectl set-hostname worker-${count.index + 1}
+    echo "127.0.0.1 worker-${count.index + 1}" >> /etc/hosts
+  EOF
 }
+
+
+#########################################################################
