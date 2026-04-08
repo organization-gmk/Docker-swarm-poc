@@ -27,3 +27,9 @@ variable "subnet_ids" {
   description = "List of subnet IDs to launch instances in"
   type        = list(string)
 }
+
+variable "tags" {
+  description = "A map of tags to assign to all resources"
+  type        = map(string)
+  default     = {}
+}
