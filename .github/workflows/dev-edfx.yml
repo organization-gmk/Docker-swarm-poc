@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/infra-deploy.yml
     with:
       environment: edfx-dev
-      WORKING_DIR: Aws-infra/iac/
+      WORKING_DIR: Aws-infra-iac/
       Terraform_Backend_Configuration_File: tf_env/Backend_Edfx_Config_Ohio.config
       Terraform_Deployment_Configuration_File: tf_env/Dev_Edfx_Deployment.tfvars
       Action: ${{ github.event.inputs.Action }}
