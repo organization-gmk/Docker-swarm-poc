@@ -1,5 +1,5 @@
 resource "aws_ebs_volume" "nfs_shared_storage" {
-  availability_zone = "us-east-1a"
+  availability_zone = var.azs[0]
   size              = 25
   type              = "gp3"
   encrypted         = true

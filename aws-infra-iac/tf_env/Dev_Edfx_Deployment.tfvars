@@ -5,4 +5,4 @@ environment   = "dev"
 
 mngr_instance_type   = "t2.medium"
 worker_instance_type = "t2.medium"
-key_name             = "gkn-test.pem"
+key_name             = "gkn-test"

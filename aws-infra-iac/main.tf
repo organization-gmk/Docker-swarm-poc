@@ -13,11 +13,12 @@ module "vpc" {
 module "compute-cloud" {
   source = "./modules/elastic-compute"
 
-  name_prefix = local.name_prefix
-  mngr_instance_type = var.mngr_instance_type
-  worker_instance_type = var.worker_instance_type
-  docker-swarm-sg_id   = [module.vpc.docker-swarm-manager-sg_id]
-  subnet_ids           = module.vpc.private_subnets
-  key_name             = var.key_name 
-  tags = local.common_tags
+  name_prefix           = local.name_prefix
+  azs                   = local.azs
+  mngr_instance_type    = var.mngr_instance_type
+  worker_instance_type  = var.worker_instance_type
+  docker-swarm-sg_id    = [module.vpc.docker-swarm-manager-sg_id]
+  subnet_ids            = module.vpc.private_subnets
+  key_name              = var.key_name 
+  tags                  = local.common_tags
 }
