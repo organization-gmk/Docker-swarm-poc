@@ -1,7 +1,8 @@
 # Security Group
 resource "aws_security_group" "swarm" {
-  name        = "docker-swarm-cluster"
+  name        = "${var.name_prefix}-swarm-cluster-sg"
   description = "Docker Swarm cluster security group"
+  vpc_id      = aws_vpc.gmk-vpc.id
 
    ingress {
     from_port   = 22
@@ -15,7 +16,7 @@ resource "aws_security_group" "swarm" {
     from_port   = 2377
     to_port     = 2377
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    self        = true
     description = "Swarm management"
   }
 
@@ -24,14 +25,14 @@ resource "aws_security_group" "swarm" {
     from_port   = 7946
     to_port     = 7946
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    self        = true
   }
   
   ingress {
     from_port   = 7946
     to_port     = 7946
     protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
+    self        = true
   }
 
   # Overlay network traffic
@@ -39,7 +40,7 @@ resource "aws_security_group" "swarm" {
     from_port   = 4789
     to_port     = 4789
     protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
+    self        = true
   }
 
   # NFS Server
@@ -97,7 +98,38 @@ resource "aws_security_group" "swarm" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-   tags = merge(var.tags, {
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-Swarm-SG"
+  })
+}
+
+resource "aws_security_group" "swarm_lb" {
+  name        = "${var.name_prefix}-swarm-lb-sg"
+  description = "Load balancer inbound HTTP/HTTPS"
+  vpc_id      = aws_vpc.gmk-vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.tags, {
     Name = "${var.name_prefix}-Swarm-LB-SG"
   })
 }
