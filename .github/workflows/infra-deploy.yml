@@ -29,7 +29,7 @@ jobs:
     container:
       image: krishna0011/awscli-tf-1.5:latest
       credentials:
-        username: ${{ vars.DOCKER_USERNAME }}
+        username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PAT }}
     defaults:
       run:
