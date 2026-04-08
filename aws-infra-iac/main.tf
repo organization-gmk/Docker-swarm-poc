@@ -19,6 +19,5 @@ module "compute-cloud" {
   docker-swarm-sg_id = module.vpc.docker-swarm-manager-sg_id
   subnet_ids           = module.vpc.private_subnets
   key_name             = var.key_name 
-
   tags = local.common_tags
 }

@@ -39,9 +39,3 @@ variable "key_name" {
   type        = string
 }
 
-variable "tags" {
-  description = "Additional tags to apply to resources"
-  type        = map(string)
-  default     = {}
-}
-
