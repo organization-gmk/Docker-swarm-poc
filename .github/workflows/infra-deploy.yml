@@ -21,16 +21,12 @@ on:
         default: "apply"
         description: "Terraform action to perform (apply or destroy)"
 
-permissions:
-  contents: read
-  issues: write
-
 jobs:
   plan-and-apply-deployment:
     name: "Terraform Init, Validate, Plan, Upload State, Apply/Destroy"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    container: 
+    container:
       image: krishna0011/awscli-tf-1.5:latest
       credentials:
         username: ${{ vars.DOCKER_USERNAME }}
@@ -41,15 +37,16 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      issues: write
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Check Action Type
         id: check_action
@@ -64,7 +61,7 @@ jobs:
         run: |
           rm -rf .terraform
           terraform init -backend-config=${{ inputs.Terraform_Backend_Configuration_File }}
-          
+
       - name: Terraform Validate
         run: terraform validate
 
@@ -72,19 +69,19 @@ jobs:
         if: steps.check_action.outputs.action == 'apply'
         run: |
           export TF_LOG=INFO
-          terraform plan -out terraform.plan -input=false -lock=false -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
+          terraform plan -out terraform.plan -input=false -lock-timeout=60s -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
 
       - name: Terraform Plan for Destroy
         if: steps.check_action.outputs.action == 'destroy'
         run: |
           export TF_LOG=INFO
-          terraform plan -destroy -out terraform.plan -input=false -lock=false -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
+          terraform plan -destroy -out terraform.plan -input=false -lock-timeout=60s -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
 
       - name: Store plan
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: terraform.plan
+          path: ${{ github.workspace }}/${{ inputs.WORKING_DIR }}/terraform.plan
 
       - name: Terraform Apply or Destroy
         run: |
@@ -102,4 +99,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-state
-          path: terraform_state.json
+          path: ${{ github.workspace }}/${{ inputs.WORKING_DIR }}/terraform_state.json
